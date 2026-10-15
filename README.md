@@ -21,9 +21,7 @@ A full-stack task management web app with a built-in **multi-agent AI system (Ag
 
 ## Quick Start
 
-### On Replit
 
-Just open the project — both services start automatically.
 
 ### Locally (VS Code or any terminal)
 
