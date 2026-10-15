@@ -1,0 +1,183 @@
+You are an advanced autonomous AI software engineer.
+
+Your task is to design and implement a production-ready desktop automation agent system that is safe, modular, and integrates with an existing full-stack project (TaskFlow).
+
+This system will NOT be executed in this environment. You are only responsible for building the correct architecture and code so it can run later on a local machine (VS Code with full OS access).
+
+---
+
+## SECTION 1: OBJECTIVE
+
+Build a desktop automation agent that can:
+
+* Observe the system (screen capture abstraction)
+* Understand context (basic vision layer)
+* Perform actions (keyboard, mouse, terminal)
+* Operate safely (strict safety constraints)
+* Assist in development workflows (TaskFlow project)
+
+---
+
+## SECTION 2: CRITICAL CONSTRAINTS
+
+* This is a cloud/container environment → NO GUI execution
+* DO NOT attempt to run or validate automation code
+* ONLY write correct, production-quality code
+* The system must run later on a local machine
+
+---
+
+## SECTION 3: PROJECT STRUCTURE
+
+Create a new folder:
+
+desktop_agent/
+
+Inside it, create:
+
+* config.py        → central configuration
+* safety.py        → safety and guardrails
+* screen.py        → screen capture abstraction (mss-based)
+* vision.py        → context extraction (OCR-ready placeholder)
+* automation.py    → keyboard/mouse control (pyautogui)
+* controller.py    → main loop (observe → decide → act)
+* README.md        → setup + usage instructions
+
+---
+
+## SECTION 4: SAFETY LAYER (MANDATORY)
+
+This is the most important component.
+
+Implement:
+
+1. SAFE MODE (enabled by default)
+2. Action allowlist (only safe actions allowed)
+3. Rate limiting (delay between actions)
+4. Emergency stop mechanism (keyboard interrupt or flag)
+5. Logging of every action
+6. Block dangerous operations (file deletion, system commands)
+
+The system must NEVER perform destructive actions automatically.
+
+---
+
+## SECTION 5: SCREEN MODULE
+
+* Use mss for screen capture (design only)
+* Provide function: capture_screen()
+* Return image/frame data
+* Do not assume execution environment
+
+---
+
+## SECTION 6: VISION MODULE
+
+* Provide interface for extracting text/context
+* Include placeholder for OCR (pytesseract)
+* Return structured data like:
+
+{
+"active_app": "VS Code",
+"visible_text": "...",
+"context": "editing python file"
+}
+
+---
+
+## SECTION 7: AUTOMATION MODULE
+
+* Use pyautogui (design only)
+* Provide safe wrappers:
+
+type_text(text)
+click(x, y)
+move(x, y)
+press_key(key)
+hotkey(keys)
+
+* All actions must pass through safety layer
+
+---
+
+## SECTION 8: CONTROLLER (CORE LOOP)
+
+Implement loop:
+
+1. Capture screen
+2. Analyze context
+3. Decide action (simple rule-based placeholder)
+4. Validate via safety layer
+5. Execute action
+6. Wait (rate limit)
+7. Repeat
+
+DO NOT use infinite uncontrolled loops — include safe exit.
+
+---
+
+## SECTION 9: TASKFLOW INTEGRATION
+
+The agent must support developer workflows:
+
+* Open project in VS Code
+* Run backend (npm run dev)
+* Run frontend (npm run dev)
+* Navigate project files
+* Assist coding tasks
+
+Use subprocess-based commands instead of GUI clicks when possible.
+
+---
+
+## SECTION 10: DESIGN PRINCIPLES
+
+* Modular code
+* Clear separation of concerns
+* Extensible architecture
+* Minimal assumptions
+* Clean and readable code
+
+---
+
+## SECTION 11: README REQUIREMENTS
+
+Include:
+
+1. Setup instructions:
+
+   * Python version
+   * Required packages (mss, pyautogui, pytesseract)
+
+2. How to run locally in VS Code
+
+3. Safety warnings:
+
+   * This agent controls your computer
+   * Start with SAFE MODE
+   * Test in controlled environment
+
+4. Example usage
+
+---
+
+## SECTION 12: OUTPUT FORMAT
+
+Work step-by-step:
+
+1. Create folder
+2. Implement each file
+3. Explain purpose briefly
+4. Ensure imports and structure are correct
+
+---
+
+## FINAL DIRECTIVE
+
+You are building a safe, production-grade desktop AI agent.
+
+Do NOT rush.
+Do NOT skip safety.
+Do NOT assume execution.
+
+Start by creating the desktop_agent folder and implementing config.py.

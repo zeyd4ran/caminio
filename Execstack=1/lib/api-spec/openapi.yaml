@@ -1,0 +1,1074 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: tasks
+    description: Task management operations
+  - name: jarvis
+    description: Local Ollama browser agent operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /jarvis/run:
+    post:
+      operationId: runJarvis
+      tags: [jarvis]
+      summary: Run Jarvis to completion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JarvisRunRequest"
+      responses:
+        "200":
+          description: Jarvis run result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisRunResult"
+        "400":
+          description: Invalid run request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+        "500":
+          description: Jarvis run failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+
+  /jarvis/run/stream:
+    post:
+      operationId: streamJarvisRun
+      tags: [jarvis]
+      summary: Run Jarvis and stream progress events
+      description: >-
+        Streams Server-Sent Events: started (session ID), step (a StepResult),
+        audit (sanitized tool call record), confirmation_required (risky action),
+        done (status and result), or error (message and session ID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JarvisRunRequest"
+      responses:
+        "200":
+          description: Server-Sent Events stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "400":
+          description: Invalid run request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+
+  /jarvis/sessions:
+    get:
+      operationId: listJarvisSessions
+      tags: [jarvis]
+      summary: List recent Jarvis sessions
+      responses:
+        "200":
+          description: Recent in-memory sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JarvisSessionSummary"
+
+  /jarvis/sessions/{id}:
+    get:
+      operationId: getJarvisSession
+      tags: [jarvis]
+      summary: Get a Jarvis session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Jarvis session details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisSession"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+
+  /jarvis/sessions/{id}/stop:
+    post:
+      operationId: stopJarvisSession
+      tags: [jarvis]
+      summary: Stop a running Jarvis session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stop request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisStopResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+
+  /jarvis/sessions/{id}/confirm:
+    post:
+      operationId: confirmJarvisAction
+      tags: [jarvis]
+      summary: Approve or deny a pending risky Jarvis action
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JarvisConfirmationRequest"
+      responses:
+        "200":
+          description: Confirmation response accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisConfirmationResponse"
+        "400":
+          description: Invalid confirmation request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+        "409":
+          description: No action is currently awaiting confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JarvisErrorResponse"
+
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List the signed-in user's conversation history
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 200
+      responses:
+        "200":
+          description: Matching conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConversationSummary"
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createConversation
+      tags: [conversations]
+      summary: Create a conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationBody"
+      responses:
+        "201":
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
+        "400":
+          description: Invalid conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /conversations/{id}:
+    patch:
+      operationId: renameConversation
+      tags: [conversations]
+      summary: Rename a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameConversationBody"
+      responses:
+        "200":
+          description: Conversation renamed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationSummary"
+        "400":
+          description: Invalid title or identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteConversation
+      tags: [conversations]
+      summary: Delete a conversation and its messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Conversation deleted
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /conversations/{id}/messages:
+    get:
+      operationId: listConversationMessages
+      tags: [conversations]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation and ordered messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationMessages"
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: appendConversationMessage
+      tags: [conversations]
+      summary: Append a message to a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppendConversationMessageBody"
+      responses:
+        "201":
+          description: Message appended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationMessage"
+        "400":
+          description: Invalid message or identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List all tasks
+      description: Returns all tasks for the authenticated user
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [todo, in_progress, done]
+        - name: priority
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [low, medium, high]
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskBody"
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks/stats:
+    get:
+      operationId: getTaskStats
+      tags: [tasks]
+      summary: Get task statistics
+      description: Returns summary statistics for the authenticated user's tasks
+      responses:
+        "200":
+          description: Task statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskStats"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get a task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskBody"
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Task deleted
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks/{id}/toggle:
+    patch:
+      operationId: toggleTaskComplete
+      tags: [tasks]
+      summary: Toggle task completion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task completion toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    JarvisRunRequest:
+      type: object
+      properties:
+        goal:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        model:
+          type: string
+          default: llama3.1
+        maxSteps:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 25
+        stepTimeoutMs:
+          type: integer
+          minimum: 5000
+          maximum: 120000
+          default: 60000
+        ollamaUrl:
+          type: string
+          format: uri
+          default: http://localhost:11434
+      required:
+        - goal
+
+    JarvisToolCall:
+      type: object
+      properties:
+        tool:
+          type: string
+          enum:
+            - browser_navigate
+            - browser_extract_dom
+            - browser_click
+            - type_text
+            - open_app
+            - wait
+            - get_system_state
+        input:
+          oneOf:
+            - type: string
+            - type: number
+        reason:
+          type: string
+      required:
+        - tool
+        - reason
+
+    JarvisStepResult:
+      type: object
+      properties:
+        step:
+          type: integer
+        toolCall:
+          $ref: "#/components/schemas/JarvisToolCall"
+        output:
+          type: string
+        success:
+          type: boolean
+        error:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - step
+        - toolCall
+        - output
+        - success
+        - timestamp
+
+    JarvisStatus:
+      type: string
+      enum: [running, completed, failed, stopped]
+
+    JarvisRunResult:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        goal:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/JarvisStepResult"
+        auditLog:
+          type: array
+          items:
+            $ref: "#/components/schemas/JarvisAuditRecord"
+        status:
+          $ref: "#/components/schemas/JarvisStatus"
+        completedAt:
+          type: string
+          format: date-time
+      required:
+        - sessionId
+        - goal
+        - steps
+        - auditLog
+        - status
+        - completedAt
+
+    JarvisSession:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        goal:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/JarvisStepResult"
+        auditLog:
+          type: array
+          items:
+            $ref: "#/components/schemas/JarvisAuditRecord"
+        failureCount:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        status:
+          $ref: "#/components/schemas/JarvisStatus"
+      required:
+        - sessionId
+        - goal
+        - steps
+        - auditLog
+        - failureCount
+        - startedAt
+        - status
+
+    JarvisSessionSummary:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        goal:
+          type: string
+        status:
+          $ref: "#/components/schemas/JarvisStatus"
+        steps:
+          type: integer
+        failureCount:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+      required:
+        - sessionId
+        - goal
+        - status
+        - steps
+        - failureCount
+        - startedAt
+
+    JarvisStopResponse:
+      type: object
+      properties:
+        stopped:
+          type: boolean
+        sessionId:
+          type: string
+      required:
+        - stopped
+        - sessionId
+
+    JarvisAuditRecord:
+      type: object
+      properties:
+        step:
+          type: integer
+        tool:
+          type: string
+          enum: [browser_navigate, browser_extract_dom, browser_click, type_text, open_app, wait, get_system_state]
+        status:
+          type: string
+          enum: [confirmation_requested, approved, denied, blocked, succeeded, failed, timed_out, completed]
+        inputLength:
+          type: integer
+        browserOrigin:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - step
+        - tool
+        - status
+        - inputLength
+        - timestamp
+
+    JarvisConfirmationRequest:
+      type: object
+      properties:
+        approved:
+          type: boolean
+      required:
+        - approved
+
+    JarvisConfirmationResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        approved:
+          type: boolean
+      required:
+        - sessionId
+        - approved
+
+    JarvisErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        issues:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required:
+        - error
+
+    CreateConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        source:
+          type: string
+          enum: [agent_lab, jarvis]
+      required:
+        - title
+        - source
+
+    RenameConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+        - title
+
+    AppendConversationMessageBody:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+          minLength: 1
+          maxLength: 20000
+      required:
+        - role
+        - content
+
+    ConversationMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        source:
+          type: string
+          enum: [agent_lab, jarvis]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+      required:
+        - id
+        - title
+        - source
+        - createdAt
+        - updatedAt
+        - messageCount
+
+    ConversationMessages:
+      type: object
+      properties:
+        conversation:
+          $ref: "#/components/schemas/ConversationSummary"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationMessage"
+      required:
+        - conversation
+        - messages
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type: string
+            details:
+              description: Optional machine-readable error details
+          required:
+            - code
+            - message
+            - requestId
+      required:
+        - error
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        dueDate:
+          type: ["string", "null"]
+        userId:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - status
+        - priority
+        - userId
+        - createdAt
+        - updatedAt
+
+    CreateTaskBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+          default: todo
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        dueDate:
+          type: ["string", "null"]
+      required:
+        - title
+
+    UpdateTaskBody:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        dueDate:
+          type: ["string", "null"]
+
+    TaskStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        completed:
+          type: integer
+        pending:
+          type: integer
+        overdue:
+          type: integer
+        byPriority:
+          $ref: "#/components/schemas/PriorityBreakdown"
+        recentlyCompleted:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+      required:
+        - total
+        - completed
+        - pending
+        - overdue
+        - byPriority
+        - recentlyCompleted
+
+    PriorityBreakdown:
+      type: object
+      properties:
+        low:
+          type: integer
+        medium:
+          type: integer
+        high:
+          type: integer
+      required:
+        - low
+        - medium
+        - high

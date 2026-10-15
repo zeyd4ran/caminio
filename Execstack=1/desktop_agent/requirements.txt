@@ -1,0 +1,13 @@
+# desktop_agent dependencies
+# Install on your local machine ONLY — not compatible with headless cloud environments.
+#
+# pip install -r desktop_agent/requirements.txt
+
+mss>=9.0.1               # cross-platform screen capture (Windows, macOS, Linux)
+Pillow>=10.0.0           # image processing (screenshot saving, cropping)
+pytesseract>=0.3.10      # OCR wrapper — also requires Tesseract binary:
+                         #   Windows: https://github.com/UB-Mannheim/tesseract/wiki
+                         #   macOS:   brew install tesseract
+                         #   Linux:   sudo apt install tesseract-ocr
+pyautogui>=0.9.54        # keyboard and mouse automation
+openai>=1.0.0            # LLM calls (shared with the multi-agent core)

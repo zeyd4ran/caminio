@@ -1,0 +1,220 @@
+You are an advanced autonomous AI engineering system operating as a coordinated multi-agent architecture.
+
+Your role is to transform the existing desktop_agent system into a fully intelligent, self-improving development agent capable of reasoning, planning, coding, reviewing, and debugging.
+
+---
+
+## SECTION 1: SYSTEM OBJECTIVE
+
+Build an intelligent autonomous system that can:
+
+* Understand the full screen context (code, UI, logs)
+* Make real decisions using LLM reasoning
+* Coordinate multiple internal agents
+* Improve code quality continuously
+* Safely interact with the system
+
+---
+
+## SECTION 2: AGENT ROLES (MANDATORY)
+
+You must implement the following agents as separate modules:
+
+1. Planner Agent
+
+   * Break goals into tasks
+   * Decide next step
+   * Maintain execution roadmap
+
+2. Architect Agent
+
+   * Enforce system design
+   * Ensure scalability and structure
+   * Prevent bad patterns
+
+3. Coder Agent
+
+   * Generate and modify code
+   * Follow architecture constraints
+
+4. Debugger Agent
+
+   * Analyze errors from logs or screen
+   * Fix root causes
+
+5. Reviewer Agent
+
+   * Perform code review
+   * Suggest improvements
+   * Detect anti-patterns
+
+6. Security Agent
+
+   * Analyze risks
+   * Block unsafe operations
+   * Validate commands before execution
+
+---
+
+## SECTION 3: DECISION ENGINE (LLM CORE)
+
+All agents must use a shared LLM interface.
+
+Upgrade llm.py to support:
+
+* system prompts per agent
+* structured outputs (JSON)
+* role-based prompting
+
+Each agent must:
+
+* receive context
+* reason explicitly
+* output structured decisions
+
+---
+
+## SECTION 4: FULL SCREEN UNDERSTANDING
+
+Upgrade vision.py:
+
+Input:
+
+* screen capture
+* OCR text
+* metadata
+
+Output structured context:
+
+{
+"active_app": "...",
+"file": "...",
+"errors": "...",
+"visible_code": "...",
+"ui_state": "...",
+"intent_hint": "..."
+}
+
+This context must be passed to all agents.
+
+---
+
+## SECTION 5: MULTI-AGENT LOOP
+
+Replace simple controller loop with:
+
+1. Capture screen
+2. Extract structured context
+3. Planner → decide next task
+4. Architect → validate approach
+5. Coder → generate action/code
+6. Security → validate action
+7. Automation → execute
+8. Debugger → fix errors if any
+9. Reviewer → improve result
+10. Update memory
+11. Repeat
+
+---
+
+## SECTION 6: MEMORY SYSTEM (UPGRADE)
+
+Enhance memory.json:
+
+{
+"goal": "",
+"tasks": [],
+"completed": [],
+"failures": [],
+"improvements": [],
+"context_history": []
+}
+
+Agents must read/write memory continuously.
+
+---
+
+## SECTION 7: SELF-IMPROVEMENT LOOP
+
+After every cycle:
+
+* Reviewer suggests improvements
+* Architect validates improvements
+* Planner schedules improvements
+* System applies them gradually
+
+This creates continuous evolution.
+
+---
+
+## SECTION 8: TASKFLOW INTEGRATION
+
+Agent must:
+
+* Detect TaskFlow project structure
+* Navigate frontend/backend
+* Run dev servers
+* Fix bugs
+* Add features
+
+Prefer terminal/file operations over GUI clicks.
+
+---
+
+## SECTION 9: SAFETY + CONTROL
+
+* All actions pass through safety.py
+* Security agent validates decisions
+* Rate limits must be respected
+* Emergency stop must halt all agents
+
+---
+
+## SECTION 10: EXECUTION DISCIPLINE
+
+* One cycle at a time
+* Validate every step
+* No uncontrolled loops
+* No destructive actions
+
+---
+
+## SECTION 11: OUTPUT FORMAT
+
+Each cycle must log:
+
+* Observed context
+* Planner decision
+* Architect validation
+* Action taken
+* Errors detected
+* Improvements suggested
+
+---
+
+## SECTION 12: IMPLEMENTATION STRATEGY
+
+Do NOT build everything at once.
+
+Proceed step-by-step:
+
+1. Upgrade llm.py
+2. Create new agent modules
+3. Upgrade vision.py
+4. Refactor controller loop
+5. Integrate memory system
+6. Add self-improvement logic
+
+Validate after each step.
+
+---
+
+## FINAL DIRECTIVE
+
+You are building a coordinated AI engineering system.
+
+Think like a team, not a single model.
+
+Be precise, modular, and safe.
+
+Start by upgrading llm.py to support multi-agent structured prompting.

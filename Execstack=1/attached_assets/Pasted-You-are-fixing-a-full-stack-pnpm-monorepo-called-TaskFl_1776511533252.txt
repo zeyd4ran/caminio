@@ -1,0 +1,116 @@
+You are fixing a full-stack pnpm monorepo called "TaskFlow" (React + Vite frontend, Express backend, AI agents, Playwright browser agent).
+
+The project must be made FULLY WINDOWS + LINUX COMPATIBLE without breaking pnpm workspace behavior.
+
+────────────────────────────
+CURRENT ISSUES
+────────────────────────────
+- cross-env causes runtime failure on Windows and is unnecessary on Replit
+- pnpm workspace has partial/missing installs (esbuild, rollup, lightningcss native binaries)
+- Vite frontend fails due to missing or mislocated "./index.css"
+- scripts are not cross-platform safe (Linux vs Windows syntax mismatch)
+- node_modules previously corrupted causing EPERM and missing modules
+- workspace dependencies not consistently hoisted
+
+────────────────────────────
+GOAL
+────────────────────────────
+Make the project:
+✔ Works on Windows (VS Code, PowerShell, CMD)
+✔ Works on Replit (Linux)
+✔ Uses pnpm workspace correctly
+✔ Has zero native module crashes
+✔ Has stable frontend + backend startup
+
+────────────────────────────
+STEP 1 — CLEAN RESET
+────────────────────────────
+- remove all node_modules folders in workspace
+- delete pnpm-lock.yaml
+- clear pnpm store if needed
+- reinstall dependencies using pnpm clean install
+
+────────────────────────────
+STEP 2 — REMOVE CROSS-ENV (IMPORTANT)
+────────────────────────────
+Find and remove ALL usage of "cross-env".
+
+Replace scripts with Windows-safe + Linux-safe alternatives:
+
+RULE:
+Do NOT use cross-env anywhere.
+
+Replace:
+
+Before:
+  cross-env NODE_ENV=development <command>
+
+After (use Node-native environment handling):
+
+Option A (recommended):
+  NODE_ENV=development node <command>
+
+Option B (Windows-safe fallback):
+  set NODE_ENV=development && <command>
+
+Option C (best long-term):
+  move environment variables into .env file and use dotenv
+
+────────────────────────────
+STEP 3 — FIX PNPM + NATIVE MODULES
+────────────────────────────
+Ensure stable install of:
+- esbuild
+- rollup
+- lightningcss
+
+If Windows issues occur:
+Run pnpm config fixes:
+  node-linker=hoisted
+  shamefully-hoist=true
+
+Then rebuild:
+  pnpm rebuild esbuild rollup lightningcss
+
+────────────────────────────
+STEP 4 — FIX FRONTEND (VITE)
+────────────────────────────
+Ensure:
+- file exists: artifacts/taskflow/src/index.css
+- correct content:
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+- main.tsx must correctly import:
+  import "./index.css";
+
+Fix any incorrect relative paths.
+
+────────────────────────────
+STEP 5 — VERIFY STARTUP COMMANDS
+────────────────────────────
+Ensure both work on Windows AND Linux:
+
+Frontend:
+  pnpm --filter @workspace/taskflow run dev
+
+Backend:
+  pnpm --filter @workspace/api-server run dev
+
+────────────────────────────
+STEP 6 — OUTPUT REQUIRED
+────────────────────────────
+Return:
+1. Root cause summary (Windows + pnpm issues)
+2. All script changes made
+3. Dependency fixes applied
+4. Confirmation both frontend + backend run successfully
+5. Proof project is Windows + Replit compatible
+
+IMPORTANT RULES:
+- Do NOT change architecture
+- Do NOT remove Vite, React, Tailwind, pnpm
+- Do NOT introduce OS-specific hacks that break portability
+- Only fix environment, dependency, and path issues

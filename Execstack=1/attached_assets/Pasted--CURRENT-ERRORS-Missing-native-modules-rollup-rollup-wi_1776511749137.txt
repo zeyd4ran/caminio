@@ -1,0 +1,89 @@
+❌ CURRENT ERRORS
+Missing native modules:
+@rollup/rollup-win32-x64-msvc
+lightningcss.win32-x64-msvc.node
+esbuild EPERM permission errors on install
+cross-env missing in api-server
+Vite fails: Cannot find ./index.css
+pnpm install unstable due to optional dependencies
+Windows path + script incompatibility issues
+broken node_modules state
+🎯 GOAL
+
+Make the project fully working:
+
+✔ pnpm install works cleanly
+✔ frontend (Vite React) runs
+✔ backend (Express api-server) runs
+✔ no missing modules
+✔ no native binary crashes
+✔ fully Windows-compatible
+✔ monorepo stays intact
+
+🧱 REQUIRED FIXES
+1. CLEAN INSTALL (WINDOWS SAFE ONLY)
+Remove node_modules safely using Node/PowerShell commands only
+Remove lockfile safely
+Clear pnpm store safely
+Reinstall dependencies cleanly using pnpm
+
+DO NOT use Linux commands like rm -rf
+
+2. FIX NATIVE DEPENDENCIES
+
+Ensure correct installation of:
+
+rollup
+esbuild
+lightningcss
+
+Force install correct Windows binaries and rebuild native modules after install.
+
+3. FIX API SERVER
+Install missing dependency cross-env in correct workspace (@workspace/api-server)
+Ensure scripts work in PowerShell (no bash dependency)
+Ensure dev script runs build + start properly on Windows
+4. FIX VITE FRONTEND
+Ensure src/index.css exists
+If missing, recreate minimal Tailwind CSS file:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+Fix import in main.tsx
+Ensure Vite starts without errors
+5. FIX PNPM WORKSPACE
+Ensure all packages resolve correctly
+Ensure no optional dependency failures break install
+Ensure pnpm rebuild fixes native modules
+Ensure no workspace path issues
+6. WINDOWS COMPATIBILITY FIX
+Replace all Linux-only commands in scripts
+Ensure cross-platform compatibility
+Ensure PowerShell works without errors
+🚀 FINAL OUTPUT REQUIRED
+
+After fixing, provide:
+
+exact commands to run frontend and backend
+any corrected package.json scripts
+explanation of what was broken
+confirmation:
+install works
+frontend runs
+backend runs
+no missing modules
+⚠️ STRICT RULES
+MUST work on Windows
+MUST use pnpm only
+MUST NOT delete project structure
+MUST NOT suggest npm install
+MUST NOT break monorepo
+MUST fix root cause (not workaround)
+🎯 END RESULT
+
+A fully working monorepo:
+
+React Vite frontend
+Express backend
+pnpm workspace
+Windows stable native builds

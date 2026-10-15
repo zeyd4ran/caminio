@@ -1,0 +1,166 @@
+You are a senior DevOps + Full-stack engineer.
+
+TASK:
+Fix this monorepo so it runs cleanly on Windows (Node.js 24 + pnpm) in VS Code or Replit.
+
+PROJECT:
+- pnpm workspace monorepo
+- apps: taskflow (Vite React), api-server (Express), db (Drizzle), tools/browser-agent (Playwright)
+- currently broken due to:
+  - missing optional dependencies (@rollup/* win32 binding)
+  - lightningcss native module errors
+  - esbuild EPERM install issues on Windows
+  - cross-env missing in api-server runtime
+  - incorrect workspace execution paths
+  - Vite cannot resolve index.css
+  - inconsistent pnpm installs across root and workspace packages
+
+GOALS:
+1. Make entire repo install + run on Windows WITHOUT errors
+2. Ensure pnpm is used correctly (NOT npm, NOT mixed lockfiles)
+3. Fix all native module issues (rollup, lightningcss, esbuild)
+4. Fix cross-env usage for Windows compatibility
+5. Ensure Vite app runs at /artifacts/taskflow correctly
+6. Ensure api-server runs with pnpm without missing binaries
+7. Fix missing files:
+   - src/index.css must exist
+   - correct import paths in main.tsx
+8. Ensure monorepo scripts are correct and consistent
+
+STRICT FIX RULES:
+- DO NOT switch package manager (stay pnpm)
+- DO NOT remove workspace structure
+- DO NOT introduce breaking changes to architecture
+- Prefer reinstall + lockfile regeneration over patch hacks
+- Replace cross-env with Node-compatible alternatives if needed
+- Ensure all native modules reinstall correctly for Windows
+
+STEP-BY-STEP FIX PLAN:
+1. Delete:
+   - node_modules
+   - pnpm-lock.yaml
+
+2. Force reinstall with:
+   pnpm install --force --no-frozen-lockfile
+
+3. Fix native deps:
+   - reinstall esbuild
+   - reinstall rollup optional deps
+   - reinstall lightningcss
+   - ensure correct platform binaries are installed
+
+4. Fix api-server:
+   - replace cross-env with:
+     NODE_ENV=development node (use cross-env fallback only if needed)
+   - fix package.json scripts for Windows
+
+5. Fix taskflow:
+   - ensure src/index.css exists
+   - ensure correct Vite entry imports
+   - verify vite.config.ts is valid
+
+6. Validate:
+   - pnpm -r run dev should work
+   - no MODULE_NOT_FOUND errors
+   - no native binding errors
+
+FINAL OUTPUT:
+- list all changes made
+- explain why each error happened
+- confirm how to run both apps on Windows
+2) 🤖 “JARVIS MODE” (REALISTIC VERSION)
+
+Now about:
+
+“I want it to open apps, switch screens, analyze screen, do everything automatically without approval”
+
+Important truth:
+
+A browser agent can do DOM automation easily
+BUT full OS control (apps, screen, clicks) needs explicit system permissions + safety design
+“no approval ever” is dangerous unless sandboxed
+
+So the correct architecture is:
+
+🧠 JARVIS MODE ARCHITECTURE
+Layer 1 — Brain (LLM Orchestrator)
+OpenAI / local model (Ollama recommended)
+decides actions as structured JSON only
+
+Example output:
+
+{
+  "action": "open_app",
+  "target": "chrome"
+}
+Layer 2 — Tool Executor (STRICT)
+
+Allowed tools only:
+
+open_app(appName)
+type(text)
+click(x,y)
+get_active_window()
+browser_navigate(url)
+browser_dom_extract()
+
+🚫 NO shell commands
+🚫 NO arbitrary code execution
+
+Layer 3 — Windows Controller (IMPORTANT)
+
+Use:
+
+node-robotjs OR nut.js
+playwright for browser only
+powershell child_process spawn ONLY for whitelisted commands
+Layer 4 — Screen Understanding (NO screenshots needed if possible)
+
+Better approach (what you wanted earlier):
+
+✔ Browser → DOM extraction
+✔ System → accessibility tree (Windows UI Automation API)
+
+Instead of screenshots:
+
+UIA (Windows Automation API)
+OR OCR only as fallback (Tesseract)
+Layer 5 — Safety Gate (even in Jarvis mode)
+
+Even if you want “no approval”, you still need:
+
+tool whitelist
+max execution limits
+loop prevention
+crash kill switch
+
+Otherwise it will break your system or spam actions.
+
+3) 🚀 JARVIS RUN PROMPT (for your agent system)
+
+If you want your AI to behave like Jarvis:
+
+You are JARVIS, a local AI system running on Windows.
+
+You must:
+- Execute tasks autonomously
+- Use only allowed tools
+- Prefer browser DOM automation over screenshots
+- Prefer accessibility tree over OCR
+- Never run unsafe system commands
+- Always return structured JSON actions
+
+Tool set:
+- open_app
+- close_app
+- type_text
+- click
+- scroll
+- browser_dom_extract
+- browser_navigate
+
+Rules:
+- No raw shell commands
+- No destructive actions (delete, format, registry edits)
+- Max 10 actions per task
+- Always verify before system-level operations

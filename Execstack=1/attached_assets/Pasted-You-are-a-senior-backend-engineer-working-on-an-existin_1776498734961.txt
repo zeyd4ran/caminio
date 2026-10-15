@@ -1,0 +1,249 @@
+You are a senior backend engineer working on an existing production-grade monorepo.
+
+Your task is to **upgrade the system architecture safely** by introducing:
+
+1. A unified Tool Registry
+2. Integration of the browser agent as a backend tool
+3. Persistent artifact + memory storage
+4. Strong safety enforcement for tool execution
+
+⚠️ IMPORTANT:
+
+* Do NOT break existing APIs or features
+* Do NOT rewrite the whole system
+* Extend the current architecture incrementally
+* Keep code clean, modular, and production-ready
+
+---
+
+# 🧠 CONTEXT
+
+The system already includes:
+
+* Express backend (`api-server`)
+* Multi-agent pipeline (Planner → Architect → Coder → Security → Reviewer)
+* Pipeline controller with conditional routing
+* SSE streaming for logs
+* Supabase (PostgreSQL) via Drizzle ORM
+* Standalone Playwright browser agent (`tools/browser-agent`)
+
+---
+
+# 🎯 GOAL
+
+Transform the system into a **unified AI execution platform** where:
+
+* Agents can call tools
+* Browser automation is a tool
+* All actions are safe, validated, and logged
+* Outputs are stored and reusable
+
+---
+
+# 1️⃣ IMPLEMENT TOOL REGISTRY
+
+Create:
+
+`artifacts/api-server/src/services/toolRegistry.js`
+
+### Requirements:
+
+Define a standard tool structure:
+
+```js
+{
+  name: string,
+  description: string,
+  schema: object, // JSON schema
+  safety: "safe" | "sensitive",
+  execute: async (args, context) => result
+}
+```
+
+---
+
+### Features:
+
+* Register tools
+* Get tool by name
+* Validate input against schema
+* Enforce safety rules
+
+---
+
+### API:
+
+```js
+registerTool(tool)
+getTool(name)
+executeTool(name, args, context)
+```
+
+---
+
+# 2️⃣ ADD SAFETY LAYER
+
+Create:
+
+`services/safetyPolicy.js`
+
+### Rules:
+
+* If tool.safety === "sensitive":
+
+  * require `context.confirmed === true`
+* Block unknown tools
+* Validate schema strictly (no extra fields)
+* Add timeout protection (e.g. 10s max per tool)
+
+---
+
+# 3️⃣ INTEGRATE BROWSER AGENT AS TOOL
+
+Wrap existing browser agent:
+
+Create:
+
+`services/tools/browserTool.js`
+
+```js
+{
+  name: "browser_navigate",
+  description: "Navigate and perform actions on a webpage",
+  schema: {
+    url: "string",
+    goal: "string"
+  },
+  safety: "sensitive",
+  execute: async ({ url, goal }) => {
+    return await runBrowserAgent({ url, goal })
+  }
+}
+```
+
+---
+
+### IMPORTANT:
+
+* Import existing code from `tools/browser-agent`
+* Do NOT duplicate logic
+* Ensure it runs as a function, not CLI
+
+---
+
+# 4️⃣ CONNECT TOOL REGISTRY TO AGENT PIPELINE
+
+Update:
+
+`agentOrchestrator.ts`
+
+### Add:
+
+* LLM tool-calling support
+* When LLM returns tool call:
+
+  * validate via ToolRegistry
+  * execute tool
+  * send result back to LLM
+
+---
+
+### Tool call format:
+
+```js
+{
+  tool: "browser_navigate",
+  args: { url: "...", goal: "..." }
+}
+```
+
+---
+
+# 5️⃣ ADD ARTIFACT STORAGE
+
+Update DB schema:
+
+Create table:
+
+`agent_artifacts`
+
+Columns:
+
+* id
+* run_id
+* step (planner, coder, etc.)
+* type (plan, code, result, browser_output)
+* content (JSON/text)
+* created_at
+
+---
+
+### Store:
+
+* each agent output
+* tool results
+* browser agent outputs
+
+---
+
+# 6️⃣ ADD MEMORY (MINIMAL SAFE VERSION)
+
+Create:
+
+`services/memoryService.js`
+
+### MVP behavior:
+
+* store last N runs (e.g. 5)
+* allow retrieval of past artifacts
+* do NOT overcomplicate
+
+---
+
+# 7️⃣ LOG EVERYTHING (IMPORTANT)
+
+For each step:
+
+* log tool calls
+* log tool results
+* log failures
+* include in SSE stream
+
+---
+
+# 8️⃣ DO NOT BREAK EXISTING FEATURES
+
+* Existing `/agents/runs` must still work
+* UI should still stream logs
+* Task management features untouched
+
+---
+
+# ✅ EXPECTED RESULT
+
+After implementation:
+
+* Agents can call tools dynamically
+* Browser agent is fully integrated
+* System enforces safety before execution
+* All outputs are stored and reusable
+* Pipeline becomes a real “think + act” system
+
+---
+
+# 🚀 PRIORITY ORDER
+
+Implement in this exact order:
+
+1. Tool Registry
+2. Safety Policy
+3. Browser Tool integration
+4. Agent tool-calling
+5. Artifact storage
+6. Memory layer
+
+---
+
+# ⚠️ FINAL RULE
+
+Prefer small, safe, incremental changes over large rewrites.

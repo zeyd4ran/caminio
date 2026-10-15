@@ -1,0 +1,200 @@
+You are a senior software engineer responsible for stabilizing a full multi-agent system before production use in a local VS Code environment.
+
+Your goal is to eliminate all runtime errors, dependency issues, misconfigurations, and environment mismatches.
+
+---
+
+## SECTION 1: OBJECTIVE
+
+Make the entire system:
+
+* error-free in local VS Code execution
+* fully installable from scratch
+* consistent across backend + frontend + agent services
+* safe to run with one standard setup process
+
+---
+
+## SECTION 2: FULL SYSTEM CHECK
+
+Audit and fix ALL of the following:
+
+1. Backend (Agent API Server)
+
+   * missing dependencies
+   * incorrect imports
+   * broken routes
+   * environment variable issues
+
+2. Frontend (TaskFlow UI)
+
+   * broken API calls
+   * incorrect endpoints
+   * missing environment configs
+   * runtime React errors
+
+3. Agent System
+
+   * undefined modules
+   * circular imports
+   * async issues in orchestration loop
+   * missing error handling in agents
+
+4. Desktop / Automation modules
+
+   * missing libraries
+   * unsafe execution calls
+   * platform incompatibility checks
+
+---
+
+## SECTION 3: STANDARDIZE PROJECT STRUCTURE
+
+Ensure this structure works cleanly:
+
+project/
+agent_service/
+taskflow/
+desktop_agent/
+shared/
+.env.example
+README.md
+
+Fix all pathing issues so imports work correctly in VS Code.
+
+---
+
+## SECTION 4: DEPENDENCY STABILITY
+
+Generate clean installation files:
+
+* requirements.txt (backend)
+* package.json (frontend)
+* optional dev scripts (run scripts)
+
+Ensure:
+
+* no missing packages
+* no version conflicts
+* compatible versions only
+
+---
+
+## SECTION 5: ENVIRONMENT CONFIGURATION
+
+Create and validate:
+
+* .env.example file
+* proper fallback handling if env vars missing
+
+Required variables:
+
+* API keys
+* ports
+* model configuration
+* safe mode flags
+
+System must NOT crash if env vars are missing — it must fail gracefully.
+
+---
+
+## SECTION 6: ERROR HANDLING (MANDATORY)
+
+Add consistent error handling across system:
+
+Backend:
+
+* try/catch on all routes
+* structured error responses
+
+Agents:
+
+* fail-safe execution wrapper
+* retry logic (max 1 retry only)
+
+Frontend:
+
+* API fallback handling
+* loading + error UI states
+
+---
+
+## SECTION 7: RUNNABLE SETUP FLOW
+
+Create a guaranteed working startup process:
+
+Step 1:
+install dependencies
+
+Step 2:
+start backend server
+
+Step 3:
+start frontend
+
+Step 4:
+verify API connectivity
+
+Step 5:
+run health check endpoint
+
+---
+
+## SECTION 8: HEALTH CHECK SYSTEM
+
+Implement:
+
+GET /health endpoint for backend
+
+It must verify:
+
+* DB connection (if any)
+* agent system status
+* API readiness
+
+Return:
+{
+"status": "ok",
+"services": {
+"agents": true,
+"api": true
+}
+}
+
+---
+
+## SECTION 9: CLEAN LOGGING
+
+Standardize logs:
+
+* prefix logs by module (Agent / API / UI)
+* remove noisy console spam
+* ensure readable execution flow
+
+---
+
+## SECTION 10: FINAL OUTPUT
+
+Return:
+
+1. All fixed files (complete replacements if needed)
+
+2. Updated folder structure
+
+3. Exact VS Code run commands:
+
+   * install
+   * backend start
+   * frontend start
+
+4. One single “clean startup checklist”
+
+---
+
+## FINAL DIRECTIVE
+
+Your goal is ZERO runtime errors in VS Code.
+
+Do not add new features.
+
+Only stabilize, fix, and standardize the system.

@@ -1,0 +1,85 @@
+You are debugging a full-stack pnpm monorepo project called "TaskFlow".
+
+The project currently has broken setup issues due to:
+- Windows + pnpm workspace dependency resolution problems
+- missing cross-env in api-server runtime
+- broken native dependencies (rollup, esbuild, lightningcss)
+- Vite frontend missing or mislocated index.css
+- partially corrupted node_modules from previous installs
+- inconsistent cross-platform scripts (Windows vs Linux syntax)
+
+GOAL:
+Make the project fully runnable in Replit AND ensure it can later run cleanly in VS Code without dependency or OS-specific failures.
+
+────────────────────────────
+STEP 1 — CLEAN ENVIRONMENT
+────────────────────────────
+- delete node_modules in ALL workspace packages
+- delete pnpm-lock.yaml
+- clear pnpm store cache if needed
+- reinstall everything from scratch using pnpm
+
+────────────────────────────
+STEP 2 — FIX WORKSPACE DEPENDENCIES
+────────────────────────────
+- ensure "cross-env" is installed at workspace root
+- ensure all packages correctly inherit dependencies via pnpm workspace
+- verify api-server can resolve cross-env without local install
+
+If cross-env causes issues:
+- replace cross-env usage in api-server scripts with cross-platform Node alternative:
+  - use "NODE_ENV=development node ..." for Linux/Replit
+  - use "set NODE_ENV=development && ..." for Windows fallback
+  OR better: remove cross-env entirely and standardize scripts
+
+────────────────────────────
+STEP 3 — FIX FRONTEND (VITE)
+────────────────────────────
+- ensure file exists: artifacts/taskflow/src/index.css
+- ensure correct Tailwind setup exists:
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+- ensure src/main.tsx correctly imports "./index.css"
+- fix any broken import paths
+
+────────────────────────────
+STEP 4 — FIX NATIVE MODULES
+────────────────────────────
+- reinstall and rebuild:
+  - rollup
+  - lightningcss
+  - esbuild
+
+If native binaries fail:
+- force pnpm config:
+  node-linker=hoisted
+  shamefully-hoist=true
+
+────────────────────────────
+STEP 5 — VERIFY RUN COMMANDS
+────────────────────────────
+Ensure these work:
+
+Frontend:
+  pnpm --filter @workspace/taskflow run dev
+
+Backend:
+  pnpm --filter @workspace/api-server run dev
+
+────────────────────────────
+STEP 6 — OUTPUT REQUIRED
+────────────────────────────
+Return:
+1. Root cause of all issues
+2. Exact commands used to fix
+3. Any script changes made
+4. Confirmation that both frontend and backend start successfully
+
+IMPORTANT RULES:
+- Do NOT change project architecture
+- Do NOT remove Vite, React, or pnpm
+- Do NOT simplify features
+- Only fix environment + dependency + path issues
+- Ensure compatibility with both Replit (Linux) and VS Code (Windows)

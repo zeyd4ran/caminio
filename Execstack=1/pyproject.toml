@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "camin"
+version = "0.1.0"
+description = "A terminal-based multi-agent engineering assistant"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0.0",
+    "rich>=13.7.0",
+    "prompt_toolkit>=3.0.43",
+    "pyfiglet>=1.0.2",
+    "python-dotenv>=1.0.1",
+]
+
+[project.scripts]
+camin = "cli:main"
+
+[tool.setuptools]
+py-modules = ["cli", "agent_loop"]
+packages = ["agents", "core"]

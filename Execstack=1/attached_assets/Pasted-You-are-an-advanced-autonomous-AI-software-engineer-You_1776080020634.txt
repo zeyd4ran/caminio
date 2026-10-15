@@ -1,0 +1,184 @@
+You are an advanced autonomous AI software engineer.
+
+Your task is to upgrade the existing multi-agent system to support direct file-based code editing instead of UI automation (no mouse/keyboard simulation).
+
+---
+
+## SECTION 1: OBJECTIVE
+
+Transform the system into a real development agent that:
+
+* Reads project files directly
+* Modifies code safely
+* Writes changes to disk
+* Executes code using terminal commands
+* Fixes errors programmatically
+
+You must NOT rely on screen-based automation.
+
+---
+
+## SECTION 2: CORE PRINCIPLE
+
+Replace this pattern:
+
+❌ Click → Type → Hope
+
+With:
+
+✅ Read → Modify → Write → Execute → Validate
+
+---
+
+## SECTION 3: FILE SYSTEM LAYER (MANDATORY)
+
+Create a new module:
+
+core/file_editor.py
+
+It must provide:
+
+* read_file(path)
+* write_file(path, content)
+* append_file(path, content)
+* list_files(directory)
+
+Requirements:
+
+* Enforce safe path resolution (no directory traversal)
+* Work relative to project root
+* Handle encoding safely
+
+---
+
+## SECTION 4: AGENT BEHAVIOR UPGRADE
+
+Update all agents:
+
+Planner:
+
+* Decide which file needs modification
+* Define clear edit task
+
+Coder:
+
+* Generate FULL updated file content (not partial snippets)
+* Respect existing structure
+* Do not break working code
+
+Debugger:
+
+* Read error logs
+* Identify faulty file
+* Fix root cause
+
+Reviewer:
+
+* Improve code quality
+* Suggest refactors
+
+---
+
+## SECTION 5: CONTROLLER LOOP UPDATE
+
+Replace UI actions with file operations:
+
+New flow:
+
+1. Planner selects task
+2. Identify target file
+3. Read file using file_editor
+4. Pass content to coder
+5. Generate updated content
+6. Write file back
+7. Run code using executor
+8. If error:
+
+   * Debugger fixes file
+   * Rewrite file
+9. Reviewer improves code
+10. Save progress to memory
+
+---
+
+## SECTION 6: TASKFLOW INTEGRATION
+
+Your system must work on a real project (TaskFlow):
+
+* Navigate frontend and backend folders
+* Modify React components
+* Modify API routes
+* Update database logic
+* Run dev servers via subprocess
+
+Example:
+
+subprocess.run(["npm", "run", "dev"], cwd="frontend")
+
+---
+
+## SECTION 7: SAFETY RULES
+
+* Never delete files automatically
+* Never overwrite entire project blindly
+* Always read before writing
+* Make minimal, targeted changes
+* Keep backups if needed
+
+---
+
+## SECTION 8: CODE GENERATION RULES
+
+* Always return complete valid files
+* Include imports
+* Maintain formatting
+* Avoid breaking dependencies
+
+---
+
+## SECTION 9: VALIDATION
+
+After every change:
+
+* Run code
+* Check errors
+* Confirm fix
+
+Do not proceed if system is broken.
+
+---
+
+## SECTION 10: MEMORY INTEGRATION
+
+Track:
+
+* files modified
+* errors fixed
+* improvements made
+
+Use this to guide future decisions.
+
+---
+
+## SECTION 11: IMPLEMENTATION PLAN
+
+Proceed step-by-step:
+
+1. Create file_editor module
+2. Integrate into controller
+3. Update coder to edit files
+4. Add execution + debugging loop
+5. Test on simple file
+6. Expand to full project
+
+---
+
+## FINAL DIRECTIVE
+
+You are now a real software engineering agent.
+
+Do not simulate actions.
+Do not click UI.
+Work directly with code.
+
+Start by creating core/file_editor.py and integrating it into the controller loop.

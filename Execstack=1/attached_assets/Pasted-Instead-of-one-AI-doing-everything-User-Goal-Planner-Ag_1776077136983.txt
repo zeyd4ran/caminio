@@ -1,0 +1,225 @@
+Instead of one AI doing everything:
+
+User Goal
+   ↓
+Planner Agent (decides next step)
+   ↓
+Coder Agent (writes code)
+   ↓
+Executor (runs code)
+   ↓
+Debugger Agent (fixes errors)
+   ↓
+Memory + Tracker
+   ↓
+Repeat
+⚙️ 2. Project Structure (IMPORTANT)
+
+Refactor your project like this:
+
+project/
+│
+├── agents/
+│   ├── planner.py
+│   ├── coder.py
+│   ├── debugger.py
+│
+├── core/
+│   ├── executor.py
+│   ├── memory.py
+│   ├── llm.py
+│
+├── agent_loop.py
+├── memory.json
+├── requirements.txt
+
+👉 This keeps everything modular (important for scaling)
+
+🧠 3. LLM Wrapper (Shared Brain)
+
+core/llm.py
+
+from openai import OpenAI
+
+client = OpenAI(api_key="YOUR_API_KEY")
+
+def ask_llm(prompt):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
+
+👉 All agents will use this
+
+🧠 4. Planner Agent
+
+agents/planner.py
+
+from core.llm import ask_llm
+
+def planner(goal, memory):
+    prompt = f"""
+You are a planning agent.
+
+Goal: {goal}
+
+Completed: {memory['completed']}
+Pending: {memory['pending']}
+
+Decide the next SINGLE task to execute.
+Keep it small and testable.
+"""
+    return ask_llm(prompt)
+👨‍💻 5. Coder Agent
+
+agents/coder.py
+
+from core.llm import ask_llm
+
+def coder(task):
+    prompt = f"""
+You are a coding agent.
+
+Task: {task}
+
+Write complete working Python code.
+Return ONLY code.
+"""
+    return ask_llm(prompt)
+🐞 6. Debugger Agent
+
+agents/debugger.py
+
+from core.llm import ask_llm
+
+def debugger(error, code):
+    prompt = f"""
+You are a debugging agent.
+
+Error:
+{error}
+
+Code:
+{code}
+
+Fix the issue and return corrected code only.
+"""
+    return ask_llm(prompt)
+⚙️ 7. Code Executor
+
+core/executor.py
+
+import subprocess
+
+def run_code():
+    result = subprocess.run(
+        ["python", "app.py"],
+        capture_output=True,
+        text=True
+    )
+    return result.returncode, result.stdout, result.stderr
+🧠 8. Memory System
+
+core/memory.py
+
+import json
+
+def load_memory():
+    with open("memory.json") as f:
+        return json.load(f)
+
+def save_memory(data):
+    with open("memory.json", "w") as f:
+        json.dump(data, f, indent=2)
+🔁 9. Main Agent Loop (THE HEART)
+
+agent_loop.py
+
+from agents.planner import planner
+from agents.coder import coder
+from agents.debugger import debugger
+from core.executor import run_code
+from core.memory import load_memory, save_memory
+
+goal = "Build a task management system"
+
+while True:
+    memory = load_memory()
+
+    print("Thinking...")
+
+    task = planner(goal, memory)
+    print("TASK:", task)
+
+    code = coder(task)
+
+    with open("app.py", "w") as f:
+        f.write(code)
+
+    returncode, stdout, stderr = run_code()
+
+    if returncode != 0:
+        print("Error detected")
+        fixed_code = debugger(stderr, code)
+
+        with open("app.py", "w") as f:
+            f.write(fixed_code)
+
+        continue
+
+    memory["completed"].append(task)
+    save_memory(memory)
+
+    if "complete" in task.lower():
+        break
+🧠 10. Upgrade Prompts (CRITICAL)
+
+Make your agents smarter:
+
+Planner Prompt Upgrade:
+include project files
+include API status
+include DB state
+Coder Prompt Upgrade:
+“follow project structure”
+“don’t overwrite existing logic”
+Debugger Prompt Upgrade:
+“fix root cause, not symptom”
+🔥 11. What You Just Built
+
+You now have:
+
+✅ Multi-agent system
+✅ Task-based execution
+✅ Self-debugging loop
+✅ Memory tracking
+
+👉 This is a mini version of Devin-style architecture
+
+🚀 12. Next-Level Upgrades
+
+Once this works, you can add:
+
+🧠 More Agents
+Tester agent (runs test cases)
+Refactor agent (cleans code)
+Reviewer agent (checks quality)
+📊 Dashboard
+
+Track:
+
+tasks completed
+errors fixed
+progress
+🔁 Continuous Mode
+
+Run forever:
+
+while True:
+    ...
+🧠 Local AI Upgrade
+
+Switch to:
+
+Ollama

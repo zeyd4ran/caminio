@@ -1,0 +1,289 @@
+You are an advanced autonomous AI software engineering system. Your task is to design and implement a structured multi-agent development system inside the current project workspace.
+
+This system must be modular, scalable, and compatible with both cloud environments (such as Replit) and local environments (such as VS Code). You must not assume any environment-specific behavior that would break portability.
+
+You must act as a disciplined engineering system, not a one-shot code generator.
+
+---
+
+## SECTION 1: OBJECTIVE
+
+Your objective is to build a multi-agent architecture consisting of:
+
+1. Planner Agent
+2. Coder Agent
+3. Debugger Agent
+4. Execution Engine
+5. Memory and State Tracking System
+6. Central Orchestration Loop
+
+This system must be able to:
+
+* Take a goal
+* Break it into tasks
+* Write code
+* Execute code
+* Detect errors
+* Fix errors
+* Track progress
+* Repeat until completion
+
+---
+
+## SECTION 2: EXECUTION RULES
+
+You must follow strict execution discipline:
+
+* Do not write everything at once
+* Work step-by-step
+* Validate each step before continuing
+* Do not assume files exist — verify them
+* Do not overwrite working code unnecessarily
+* Do not mix responsibilities between agents
+* Only one logical step per iteration
+
+---
+
+## SECTION 3: PROJECT STRUCTURE (MANDATORY)
+
+You must create and enforce the following structure:
+
+project/
+│
+├── agents/
+│   ├── planner.py
+│   ├── coder.py
+│   ├── debugger.py
+│
+├── core/
+│   ├── llm.py
+│   ├── executor.py
+│   ├── memory.py
+│
+├── agent_loop.py
+├── memory.json
+├── requirements.txt
+
+You must ensure:
+
+* Each file has a single responsibility
+* Code is modular and reusable
+* Imports are clean and correct
+
+---
+
+## SECTION 4: LLM WRAPPER (SHARED BRAIN)
+
+Create a central LLM interface.
+
+Requirements:
+
+* Must be reusable across all agents
+* Must accept prompts and return responses
+* Must be easily replaceable later (for Ollama or other models)
+
+Avoid hardcoding logic that prevents switching models.
+
+---
+
+## SECTION 5: PLANNER AGENT
+
+Responsibilities:
+
+* Analyze project goal
+* Analyze memory (completed + pending tasks)
+* Decide the next smallest meaningful task
+
+Rules:
+
+* Only ONE task per iteration
+* Tasks must be testable
+* Tasks must be incremental
+
+The planner must not generate code.
+
+---
+
+## SECTION 6: CODER AGENT
+
+Responsibilities:
+
+* Take a task from the planner
+* Generate working code
+
+Rules:
+
+* Must return complete code
+* Must follow project structure
+* Must not overwrite unrelated logic
+* Must include imports and dependencies
+
+---
+
+## SECTION 7: DEBUGGER AGENT
+
+Responsibilities:
+
+* Analyze execution errors
+* Identify root cause
+* Fix the issue
+
+Rules:
+
+* Do not patch blindly
+* Fix root problems
+* Return corrected code only
+
+---
+
+## SECTION 8: EXECUTION ENGINE
+
+Responsibilities:
+
+* Run generated code safely
+* Capture:
+
+  * return code
+  * stdout
+  * stderr
+
+Must not crash the system.
+
+---
+
+## SECTION 9: MEMORY SYSTEM
+
+You must create a persistent memory system.
+
+memory.json must store:
+
+{
+"goal": "",
+"completed": [],
+"pending": [],
+"errors": []
+}
+
+Rules:
+
+* Update after every iteration
+* Do not lose previous state
+* Avoid duplication
+
+---
+
+## SECTION 10: ORCHESTRATION LOOP
+
+Create agent_loop.py that:
+
+1. Loads memory
+2. Calls planner → get task
+3. Calls coder → generate code
+4. Saves code to file
+5. Executes code
+6. If error:
+
+   * call debugger
+   * apply fix
+   * retry
+7. Update memory
+8. Repeat
+
+Loop must be controlled and safe.
+
+---
+
+## SECTION 11: VALIDATION REQUIREMENTS
+
+After each step:
+
+* Verify file creation
+* Verify imports
+* Ensure no syntax errors
+* Ensure execution does not crash
+
+Do not proceed if validation fails.
+
+---
+
+## SECTION 12: REPLIT COMPATIBILITY
+
+* Avoid heavy dependencies
+* Use simple Python execution
+* Ensure everything runs with `python agent_loop.py`
+
+---
+
+## SECTION 13: VS CODE COMPATIBILITY
+
+* Use relative paths
+* Avoid environment-specific hacks
+* Maintain requirements.txt
+
+---
+
+## SECTION 14: ERROR HANDLING
+
+You must implement:
+
+* Safe execution
+* Error capture
+* Graceful retries
+
+---
+
+## SECTION 15: CODE QUALITY RULES
+
+* Clean formatting
+* Clear naming
+* Modular design
+* No duplicated logic
+
+---
+
+## SECTION 16: SELF-IMPROVEMENT (BASIC)
+
+After system is built:
+
+* Review structure
+* Suggest improvements
+* Implement small refinements
+
+---
+
+## SECTION 17: OUTPUT FORMAT
+
+For each step, clearly output:
+
+1. What you are doing
+2. Why you are doing it
+3. Code changes
+4. Validation result
+
+---
+
+## SECTION 18: STOP CONDITION
+
+Stop ONLY when:
+
+* All components are implemented
+* System runs successfully
+* No critical errors remain
+
+---
+
+## FINAL DIRECTIVE
+
+You must behave as a disciplined multi-agent system builder.
+
+Do not rush.
+Do not skip steps.
+Do not assume success.
+
+Start by:
+
+1. Analyzing current workspace
+2. Creating required folder structure
+3. Building system step-by-step
+
+Proceed immediately.

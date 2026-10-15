@@ -1,0 +1,185 @@
+You are a senior backend engineer.
+
+Your task is to implement a **Pipeline Controller (Workflow Engine)** in **Node.js (JavaScript, not TypeScript)** for a multi-agent system.
+
+## Context
+
+The system runs agents in this order:
+Planner → Architect → Coder → Security → Reviewer
+
+Each agent is an async function:
+
+```js
+async function agent(input, context) {
+  return {
+    output: "...",
+    status: "success" | "fail",
+    metadata: {}
+  }
+}
+```
+
+## Requirements
+
+### 1. Pipeline Controller
+
+Create a module:
+`pipelineController.js`
+
+It must export a function:
+
+```js
+async function runPipeline({ userInput, agents })
+```
+
+---
+
+### 2. State Management
+
+Maintain pipeline state:
+
+```js
+const state = {
+  runId: unique id,
+  currentStep: null,
+  status: "running",
+  context: {
+    userInput,
+    artifacts: {}
+  },
+  history: []
+}
+```
+
+---
+
+### 3. Agent Execution Flow
+
+Execution order:
+
+* planner → architect → coder → security → reviewer
+
+BUT with conditional transitions:
+
+* If **security fails** → go back to `coder`
+* If **reviewer rejects** → go back to `coder`
+* If reviewer approves → pipeline completes
+
+---
+
+### 4. Transitions Logic
+
+Implement transition rules like:
+
+```js
+function getNextStep(step, result) {
+  if (step === "security") {
+    return result.status === "success" ? "reviewer" : "coder"
+  }
+  if (step === "reviewer") {
+    return result.status === "success" ? "completed" : "coder"
+  }
+
+  const order = ["planner", "architect", "coder", "security", "reviewer"]
+  const idx = order.indexOf(step)
+  return order[idx + 1]
+}
+```
+
+---
+
+### 5. History Tracking
+
+After each step, store:
+
+```js
+state.history.push({
+  step,
+  input,
+  output: result.output,
+  status: result.status,
+  timestamp: Date.now()
+})
+```
+
+---
+
+### 6. Artifact Passing
+
+Each agent’s output should be saved:
+
+```js
+state.context.artifacts[step] = result.output
+```
+
+Next agent receives:
+
+```js
+agent(previousOutput, state.context)
+```
+
+---
+
+### 7. Loop Protection (IMPORTANT)
+
+Prevent infinite loops:
+
+* max 10 iterations per step
+* if exceeded → mark pipeline as failed
+
+---
+
+### 8. Error Handling
+
+* Catch agent errors
+* Mark step as failed
+* Store error in history
+* Route back to `coder` if possible
+* If repeated failure → terminate pipeline
+
+---
+
+### 9. Logging
+
+Add console logs:
+
+```
+[Pipeline] Step: planner
+[Pipeline] Transition: planner → architect
+```
+
+---
+
+### 10. Output
+
+Return final result:
+
+```js
+return {
+  runId: state.runId,
+  status: state.status,
+  finalOutput: state.context.artifacts["reviewer"] || null,
+  history: state.history
+}
+```
+
+---
+
+## Constraints
+
+* Use plain JavaScript (Node.js, no TypeScript)
+* Use async/await
+* No external libraries required
+* Code should be clean and modular
+
+---
+
+## Bonus (if possible)
+
+* Add event emitter or callback for streaming updates (for SSE later)
+
+---
+
+## Goal
+
+Produce a clean, production-ready implementation of a **workflow engine that supports loops, retries, and state tracking** for a multi-agent AI system.

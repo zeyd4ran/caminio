@@ -1,0 +1,247 @@
+You are a senior JavaScript engineer.
+
+Your task is to implement a **Browser Agent Runtime** using **Node.js + Playwright** that extracts structured page data (DOM + Accessibility Tree) and allows an LLM to control the browser WITHOUT using screenshots.
+
+---
+
+## 🎯 Goal
+
+Build a system that:
+
+1. Reads the current webpage (DOM + accessibility tree)
+2. Converts it into **clean structured JSON**
+3. Sends it to an LLM (mock for now)
+4. Receives a structured action (click, type, scroll)
+5. Executes the action using Playwright
+6. Repeats in a loop
+
+---
+
+## 📦 Tech Constraints
+
+* Node.js (JavaScript, NOT TypeScript)
+* Use Playwright
+* No external heavy frameworks
+* Clean, modular code
+
+---
+
+## 🧱 File Structure
+
+```
+browser-agent/
+  index.js
+  browser.js
+  extractor.js
+  normalizer.js
+  agent.js
+  executor.js
+```
+
+---
+
+## 1️⃣ browser.js
+
+Initialize Playwright:
+
+* Launch browser
+* Open a page (e.g., https://example.com)
+* Export:
+
+```js
+async function initBrowser()
+```
+
+---
+
+## 2️⃣ extractor.js
+
+Extract BOTH:
+
+### A) DOM snapshot
+
+Use:
+
+```js
+await page.content()
+```
+
+### B) Accessibility Tree
+
+Use:
+
+```js
+await page.accessibility.snapshot()
+```
+
+Export:
+
+```js
+async function extractPageState(page)
+```
+
+Return:
+
+```js
+{
+  html: "...",
+  accessibilityTree: {...}
+}
+```
+
+---
+
+## 3️⃣ normalizer.js (VERY IMPORTANT)
+
+Convert raw data into clean structured JSON.
+
+Extract ONLY useful elements:
+
+* buttons
+* inputs
+* links
+* headings
+
+Output format:
+
+```js
+{
+  url: page.url(),
+  title: "...",
+  elements: [
+    {
+      id: "el_1",
+      type: "button",
+      text: "Login",
+      role: "button",
+      selectorHint: "...",
+    },
+    {
+      id: "el_2",
+      type: "input",
+      label: "Email",
+      role: "textbox"
+    }
+  ]
+}
+```
+
+Rules:
+
+* Ignore hidden elements
+* Trim long text
+* Limit to top ~50 elements
+* Prefer accessibility labels over raw HTML
+
+---
+
+## 4️⃣ agent.js (LLM mock)
+
+Simulate LLM decision making.
+
+Input:
+
+```js
+structuredPage + userGoal
+```
+
+Return action:
+
+```js
+{
+  action: "click" | "type" | "scroll",
+  target: "el_1",
+  value: "test@example.com" // for type
+}
+```
+
+For now:
+
+* hardcode simple logic (e.g., click "Login" if exists)
+
+---
+
+## 5️⃣ executor.js
+
+Execute actions safely using Playwright.
+
+Implement:
+
+```js
+async function executeAction(page, action, elements)
+```
+
+Rules:
+
+* NEVER use raw selectors from LLM
+* Map `target` (el_1) → real selector
+* If not found → throw error
+* Add timeouts
+* Log actions
+
+---
+
+## 6️⃣ index.js (main loop)
+
+Implement loop:
+
+```js
+while (true) {
+  state = await extractPageState(page)
+  structured = normalize(state)
+
+  action = agent(structured, goal)
+
+  await executeAction(page, action, structured.elements)
+}
+```
+
+Add:
+
+* max 10 steps (prevent infinite loop)
+* logging per step
+
+---
+
+## ⚠️ Safety Constraints
+
+* No screenshots
+* No arbitrary JS execution
+* No raw selector control from agent
+* Limit actions to:
+
+  * click
+  * type
+  * scroll
+
+---
+
+## 🧠 Bonus (if possible)
+
+* Highlight selected element before clicking
+* Add delay between steps (human-like behavior)
+* Print structured JSON for debugging
+
+---
+
+## ✅ Expected Output
+
+Working script that:
+
+* opens a website
+* extracts structured UI
+* chooses an action
+* executes it
+* repeats safely
+
+---
+
+## 🎯 Final Goal
+
+Produce a **minimal but extensible browser agent runtime** that can later plug into an LLM (OpenAI, etc.) and your multi-agent pipeline.
+
+Focus on:
+
+* clean architecture
+* safe execution
+* structured data flow

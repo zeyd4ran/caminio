@@ -1,0 +1,180 @@
+You are a senior full-stack + agent systems engineer.
+
+TASK:
+Extend the existing monorepo (TaskFlow + api-server + browser-agent) into a SAFE autonomous Jarvis-style local agent system running on Windows.
+
+The system must use:
+- Ollama (local LLM, no external APIs)
+- Playwright browser agent (already exists in repo)
+- Windows automation layer (restricted tools only)
+- Existing pnpm monorepo structure (DO NOT change architecture)
+
+GOAL:
+Build a new module:
+  /packages/jarvis-core
+
+This module must implement a fully autonomous task execution loop that:
+1. Takes a user goal
+2. Uses Ollama LLM to plan steps
+3. Executes steps using strict tools
+4. Observes results
+5. Iterates until completion or max steps reached
+
+---
+
+HARD RULES:
+- DO NOT introduce new package managers
+- DO NOT break existing apps (taskflow, api-server)
+- DO NOT remove current browser-agent
+- DO NOT use cloud APIs (ONLY Ollama local model)
+- DO NOT allow arbitrary shell execution
+- ALL actions must go through a tool registry
+- MUST include safety limits (max steps, loop detection, timeout)
+
+---
+
+JARVIS CORE REQUIREMENTS:
+
+Create these files:
+
+/jarvis-core
+  ├── orchestrator.ts        (main autonomous loop)
+  ├── ollama-client.ts       (calls local Ollama API)
+  ├── tool-registry.ts       (allowed actions only)
+  ├── executor.ts            (runs tools safely)
+  ├── memory.ts              (stores task state)
+  ├── prompts.ts             (system prompts for LLM)
+  ├── types.ts               (action schemas)
+
+---
+
+TOOL SYSTEM (STRICT WHITELIST ONLY):
+
+Allowed tools:
+- open_app(appName)
+- browser_navigate(url)
+- browser_extract_dom()
+- browser_click(elementId)
+- type_text(text)
+- wait(ms)
+- get_system_state()
+
+FORBIDDEN:
+- shell execution
+- file system deletion/modification
+- arbitrary code execution
+
+---
+
+OLLAMA INTEGRATION:
+
+Use local endpoint:
+http://localhost:11434/api/generate
+
+Model:
+- llama3.1 or qwen2.5
+
+The LLM MUST output ONLY valid JSON:
+
+Example:
+{
+  "tool": "browser_navigate",
+  "input": "https://google.com",
+  "reason": "start research"
+}
+
+---
+
+CORE LOOP LOGIC:
+
+Implement an autonomous loop:
+
+- input: goal string
+- initialize memory
+- repeat until:
+    - goal is complete OR
+    - maxSteps reached (default 25)
+
+Each iteration:
+1. Read system observation
+2. Send prompt to Ollama with:
+   - goal
+   - memory
+   - last result
+3. Parse JSON response
+4. Validate against tool registry
+5. Execute tool
+6. Store result in memory
+7. Continue
+
+Must include:
+- loop detection prevention
+- failure retry limit (max 3 retries per action)
+- timeout per step
+
+---
+
+BROWSER AGENT INTEGRATION:
+
+Reuse existing Playwright browser-agent in:
+tools/browser-agent
+
+Expose it as tools:
+- browser_navigate
+- browser_extract_dom
+- browser_click
+
+NO screenshots allowed — DOM-based automation only.
+
+---
+
+WINDOWS CONTROL LAYER:
+
+Create safe limited OS automation:
+- open applications (Chrome, VS Code, etc.)
+- switch windows
+- type text
+
+Use node-safe library (nut.js preferred)
+
+DO NOT allow raw command execution.
+
+---
+
+MEMORY SYSTEM:
+
+Store:
+- goal
+- steps executed
+- tool results
+- failures
+- corrections
+
+Memory must persist per session.
+
+---
+
+OUTPUT REQUIREMENTS:
+
+After implementation:
+- print how to run jarvis-core
+- show example goal execution
+- ensure it integrates with existing api-server via REST endpoint:
+  POST /jarvis/run
+
+---
+
+FINAL GOAL:
+
+The system should work like:
+
+User gives goal →
+Jarvis autonomously:
+- opens apps
+- browses web
+- extracts info
+- switches tasks
+- completes objective
+- stops automatically
+
+BUT ALWAYS within safety constraints and tool limits.

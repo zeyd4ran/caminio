@@ -1,0 +1,173 @@
+You are a senior software architect + Node.js monorepo engineer + AI agent systems designer.
+
+I have a broken pnpm monorepo project and I want you to rebuild and stabilize it into a working local AI agent system on Windows.
+
+🎯 FINAL GOAL
+
+Create a fully working system called:
+
+Local AI Agent OS (TaskFlow + Browser Agent + Agent Core)
+
+It must:
+
+✔ run on Windows (PowerShell)
+✔ use pnpm workspace only
+✔ have working frontend (Vite React)
+✔ have working backend (Express API)
+✔ include a browser automation agent (DOM-based, NO screenshots)
+✔ include an AI agent core with tool calling
+✔ support autonomous execution loop
+✔ remain safe and controlled (no raw OS abuse)
+✔ install and run with zero errors
+
+❌ CURRENT ISSUES TO FIX
+rollup missing Windows native binary
+lightningcss missing Windows module
+esbuild EPERM errors
+cross-env missing in api-server
+Vite fails due to missing index.css
+pnpm install unstable due to optional dependencies
+broken node_modules state
+Linux commands used in scripts
+monorepo not Windows-compatible
+🧱 SYSTEM YOU MUST BUILD
+1. MONOREPO STRUCTURE (DO NOT BREAK EXISTING)
+
+Keep:
+
+artifacts/taskflow (frontend)
+artifacts/api-server (backend)
+tools/browser-agent (automation)
+
+ADD:
+
+packages/agent-core
+2. AGENT CORE (NEW SYSTEM)
+
+Inside packages/agent-core implement:
+
+orchestrator.ts
+receives user input
+sends to LLM
+gets structured plan
+executes via tools
+tool-registry.ts
+
+Only allowed tools:
+
+Browser tools
+navigate(url)
+click(selector)
+extract_dom()
+System tools (SAFE ONLY)
+open_app (Chrome, VS Code, Calculator only)
+type_text()
+Memory tools
+save_memory()
+recall_memory()
+
+❌ NO shell execution allowed
+❌ NO arbitrary system commands
+
+3. AUTONOMOUS LOOP ENGINE
+
+Implement:
+
+loop:
+  observe → plan → execute → verify → repeat
+
+Must support:
+
+continuous execution mode
+retry logic
+error recovery
+structured logs
+4. BROWSER AGENT (IMPORTANT CHANGE)
+
+Replace ALL screenshot-based logic.
+
+Use ONLY:
+
+✔ DOM extraction
+✔ accessibility tree
+✔ structured JSON output
+
+No images stored, no OCR dependency unless fallback.
+
+5. SYSTEM AGENT (WINDOWS SAFE)
+
+Must support:
+
+open applications only from whitelist:
+chrome
+vscode
+calculator
+no arbitrary command execution
+no PowerShell injection
+no file deletion
+6. FRONTEND FIX (VITE)
+
+Ensure:
+
+src/index.css exists
+contains valid Tailwind setup:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+fix broken imports in main.tsx
+Vite runs successfully on port 3000
+7. BACKEND FIX (API SERVER)
+install missing cross-env in correct workspace
+ensure scripts run on Windows PowerShell
+remove all Linux-only commands
+ensure dev command works:
+pnpm --filter @workspace/api-server run dev
+8. INSTALL + BUILD FIXES
+
+Fix all native dependency issues:
+
+rollup
+esbuild
+lightningcss
+
+Ensure:
+
+correct Windows binaries installed
+pnpm rebuild works
+no EPERM errors
+clean install works from scratch
+🚀 FINAL OUTPUT REQUIRED
+
+After implementing everything, provide:
+
+full folder structure
+all commands to run project
+fixed package.json scripts (if changed)
+explanation of what was broken
+confirmation:
+frontend runs
+backend runs
+agent-core works
+browser agent works
+Windows install is stable
+⚠️ STRICT RULES
+MUST work on Windows
+MUST use pnpm only
+MUST NOT use npm
+MUST NOT use Linux commands
+MUST NOT break monorepo structure
+MUST NOT add unsafe OS execution
+MUST prioritize stability over features
+🎯 FINAL RESULT
+
+A working local system that behaves like:
+
+“AI operating system layer”
+
+It can:
+
+understand tasks
+plan steps
+execute browser automation
+manage tasks via API
+run continuously in autonomous mode
