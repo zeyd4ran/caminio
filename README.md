@@ -226,7 +226,7 @@ pnpm --filter @workspace/taskflow run dev         # start frontend
 - **Frontend**: React 19, Vite, Tailwind CSS, shadcn/ui
 - **Backend**: Express 5, TypeScript, esbuild
 - **Database**: Supabase PostgreSQL, Drizzle ORM
-- **AI**: OpenAI GPT (via Replit AI proxy), SSE streaming
+- **AI**: OpenAI GPT , SSE streaming
 - **Auth**: Clerk (optional)
 - **Browser automation**: Playwright (tools/browser-agent)
 - **Pipeline**: Custom JS workflow engine with conditional transitions + loop protection
