@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "g0ZWajcjsBHTi0axpCpAK"
+uri = "file://README.md"
+type = "text"
+title = "TaskFlow README"
